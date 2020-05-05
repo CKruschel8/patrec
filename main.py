@@ -1,6 +1,6 @@
-from data_utils import generate_data 
-from plot_data import plot_data
+from data_utils import generate_data
+from plot_data import interactive_plot
 
 train, test = generate_data()
 
-plot_data(train)
+interactive_plot(train)
