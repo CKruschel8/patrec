@@ -64,9 +64,6 @@ def offselect(xmin, xmax):
     if coords['min'] is not None:
         ax = ax1.axvspan(coords['min'], coords['max'], facecolor='#2ca02c')
 
-    print(coords['min'])
-    print(coords['max'])
-
 
 def interactive_plot(data):
     global ax1
@@ -77,14 +74,16 @@ def interactive_plot(data):
     ax1.plot(data)
     ax1.set_title('Markiere mit der linken Maustaste einen Bereich')
 
-    SpanSelector(
+    span1 = SpanSelector(
         ax=ax1, onselect=onselect, direction='horizontal',
         useblit=True, minspan=2, button=1,
         rectprops=dict(alpha=0.5, facecolor='red'))
 
-    SpanSelector(
+    span2 = SpanSelector(
         ax=ax1, onselect=offselect, direction='horizontal',
         useblit=True, minspan=2, button=3,
         rectprops=dict(alpha=0.5, facecolor='red'))
 
     plt.show()
+    del span1, span2
+    return coords['min'], coords['max']
