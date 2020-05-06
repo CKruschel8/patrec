@@ -26,10 +26,11 @@ def onselect(xmin, xmax):
     if coords['min'] is None:
         coords['min'] = xmin
         coords['max'] = xmax
+
     else:
         if coords['min'] > xmin and coords['min'] < xmax:
             coords['min'] = xmin
-        
+
         if coords['max'] < xmax and coords['max'] > xmin:
             coords['max'] = xmax
 
@@ -47,10 +48,10 @@ def offselect(xmin, xmax):
         xmax = tmp
 
     if coords['min'] is not None:
-        
+
         if xmin <= coords['min'] and xmax > coords['min']:
             coords['min'] = xmax
-        
+
         if xmax >= coords['max'] and xmin < coords['max']:
             coords['max'] = xmin
 
@@ -77,12 +78,13 @@ def interactive_plot(data):
     ax1.set_title('Markiere mit der linken Maustaste einen Bereich')
 
     SpanSelector(
-        ax=ax1, onselect=onselect, direction='horizontal', 
-        useblit=True, minspan=2, button=1, rectprops=dict(alpha=0.5, facecolor='red'))
+        ax=ax1, onselect=onselect, direction='horizontal',
+        useblit=True, minspan=2, button=1,
+        rectprops=dict(alpha=0.5, facecolor='red'))
 
     SpanSelector(
-        ax=ax1, onselect=offselect, direction='horizontal', 
-        useblit=True, minspan=2, button=3, rectprops=dict(alpha=0.5, facecolor='red'))
-    
-    plt.show()
+        ax=ax1, onselect=offselect, direction='horizontal',
+        useblit=True, minspan=2, button=3,
+        rectprops=dict(alpha=0.5, facecolor='red'))
 
+    plt.show()
