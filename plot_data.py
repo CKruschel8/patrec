@@ -1,9 +1,15 @@
 import matplotlib.pyplot as plt
-from matplotlib.widgets import SpanSelector
+from matplotlib.widgets import SpanSelector, Button
 
 coords = dict()
 coords['min'] = None
 coords['max'] = None
+
+
+class Index(object):
+
+    def close(self, event):
+        plt.close()
 
 
 def plot_data_standard(data):
@@ -73,6 +79,11 @@ def interactive_plot(data):
 
     ax1.plot(data)
     ax1.set_title('Markiere mit der linken Maustaste einen Bereich')
+    callback = Index()
+    axprev = plt.axes([0.8, 0.01, 0.1, 0.075])
+    bclose = Button(axprev, 'Schließen')
+
+
 
     span1 = SpanSelector(
         ax=ax1, onselect=onselect, direction='horizontal',
@@ -83,6 +94,8 @@ def interactive_plot(data):
         ax=ax1, onselect=offselect, direction='horizontal',
         useblit=True, minspan=2, button=3,
         rectprops=dict(alpha=0.5, facecolor='red'))
+
+    bclose.on_clicked(callback.close)
 
     plt.show()
     del span1, span2
