@@ -1,6 +1,27 @@
 import pandas as pd
+import numpy as np
 
 NAME = r"dataset\ECG.csv"
+
+
+class dataset():
+
+    def __init__(self):
+        self.no_data = True
+        self.length = 0
+
+    def add_data(self, timeseries, x_start, x_stop, label):
+        start_pos = int(x_start)
+        stop_pos = int(x_stop)
+        if self.no_data:
+            self.no_data = False
+
+            self.length = stop_pos - start_pos
+            self.data = np.ndarray((1, self.length, 1))
+            self.data[0, :, 0] = timeseries[start_pos:stop_pos]
+
+            self.label = np.ndarray((1))
+            self.label[0] = label
 
 
 def generate_data():
@@ -10,4 +31,4 @@ def generate_data():
     train = y[:2350]
     test = y[2350:]
 
-    return train, test
+    return np.array(train), np.array(test)
