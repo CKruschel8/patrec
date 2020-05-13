@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from scipy.spatial.distance import euclidean
+
 
 NAME = r"dataset\ECG.csv"
 
@@ -32,3 +34,30 @@ def generate_data():
     test = y[2350:]
 
     return np.array(train), np.array(test)
+
+
+def build_window_dataset(data, window_length):
+
+    data_slidingwindow = np.ndarray((data.shape[0]-window_length, window_length))
+    for ix in range(data.shape[0]-window_length):
+        data_slidingwindow[ix, :] = data[ix:ix+window_length]
+        
+    return data_slidingwindow
+
+
+def find_candidates(data, xmin, xmax, distance = 'euclidean', datatransform = 'data'):
+
+    length = xmax - xmin
+
+#    if datatransform == 'data+gradient':
+#        data = np.append(data, np.gradient(data))
+#    elif datatransform == 'gradient':
+#        data = np.gradient(data)
+
+    dist_array = np.ndarray((data.shape[0]-length))
+    if distance == 'euclidean':
+        for ix in range(data.shape[0]-length):
+            dist_array[ix] = euclidean(data[xmin:xmax], data[ix:ix+length])
+
+    return np.argsort(dist_array)
+
