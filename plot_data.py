@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import SpanSelector, Button
 
@@ -5,11 +6,24 @@ coords = dict()
 coords['min'] = None
 coords['max'] = None
 
+sim_ix = 1
+unsim_ix = -1
+bSimilar = True
 
 class Index(object):
 
     def close(self, event):
         plt.close()
+
+    def next(self, event):
+        if bSimilar:
+            if bGotMark:
+                plt.axvspan(sorted_list[ix], sorted_list[ix]+length, facecolor='white', alpha=1)
+                ix += 1
+                plt.axvspan(sorted_list[ix], sorted_list[ix] + length, facecolor='yellow', alpha=0.5)
+                plt.subplot(2, 1, 2)
+                plt.plot(train)
+                plt.xlim([sorted_list[ix]-tol, sorted_list[ix]+length+100])
 
 
 def plot_data_standard(data):
@@ -41,8 +55,6 @@ def onselect(xmin, xmax):
             coords['max'] = xmax
 
     ax = ax1.axvspan(coords['min'], coords['max'], facecolor='#2ca02c')
-    print(coords['min'])
-    print(coords['max'])
 
 
 def offselect(xmin, xmax):
@@ -75,15 +87,12 @@ def interactive_plot(data):
     global ax1
 
     fig, ax1 = plt.subplots(1, figsize=(8, 6))
-#    ax1.set(facecolor='#FFFFCC')
 
     ax1.plot(data)
     ax1.set_title('Markiere mit der linken Maustaste einen Bereich')
     callback = Index()
     axprev = plt.axes([0.8, 0.01, 0.1, 0.075])
     bclose = Button(axprev, 'Schließen')
-
-
 
     span1 = SpanSelector(
         ax=ax1, onselect=onselect, direction='horizontal',
@@ -99,4 +108,107 @@ def interactive_plot(data):
 
     plt.show()
     del span1, span2
-    return coords['min'], coords['max']
+    return np.int(coords['min']), np.int(coords['max'])
+
+def display_candidates(train, xmax, sorted_list):
+    global unsim_ix
+
+    length = xmax - sorted_list[0]
+    b = True
+    bGotMark = False
+
+    def close(event):
+        plt.close()
+
+    def next(event):
+        global sim_ix, unsim_ix
+
+        if bSimilar:
+            if sim_ix != len(sorted_list):
+                sim_ix += 1
+            ix = sim_ix
+        else:
+            if unsim_ix != 0:
+                unsim_ix -= 1
+            ix = unsim_ix
+        ax1.axvspan(sorted_list[ix], sorted_list[ix]+length, facecolor='yellow', alpha=0.5)
+        ax2.set_xlim([sorted_list[ix]-tol, sorted_list[ix]+length+tol])
+        print(sorted_list[ix])
+
+    def previous(event):
+        global sim_ix, unsim_ix
+
+        if bSimilar:
+            if sim_ix != 0:
+                sim_ix -= 1
+            ix = sim_ix
+        else:
+            if unsim_ix != len(sorted_list):
+                unsim_ix += 1
+            ix = unsim_ix
+        
+        ax1.axvspan(sorted_list[ix], sorted_list[ix]+length, facecolor='yellow', alpha=0.5)
+        ax2.set_xlim([sorted_list[ix]-tol, sorted_list[ix]+length+tol])
+        print(sorted_list[ix])
+ 
+    def unsimilar(event):
+        global bSimilar
+        bSimilar = False
+        bunsim.color = 'white'
+        bsim.color = '0.85'
+        print(bSimilar)
+
+    def similar(event):
+        global bSimilar
+        bSimilar = True
+        bsim.color = 'white'
+        bunsim.color = '0.85'
+        print(bSimilar)
+
+
+    tol = 100
+    callback = Index()
+    
+    unsim_ix = len(sorted_list)
+
+    plt.figure()
+    ax1 = plt.subplot(2, 1, 1)
+    plt.plot(train)
+    plt.axvspan(sorted_list[0], xmax, facecolor='orange', alpha=0.5)
+    
+    ix = sim_ix
+    plt.axvspan(sorted_list[ix], sorted_list[ix] + length, facecolor='yellow', alpha=0.5)
+    ax2 = plt.subplot(2, 1, 2)
+    plt.plot(train)
+    ax2.set_xlim([sorted_list[ix]-tol, sorted_list[ix]+length+tol])
+
+    axprev1 = plt.axes([0.8, 0.01, 0.1, 0.075])
+    bclose = Button(axprev1, 'Schließen')
+    bclose.on_clicked(close)
+
+    axprev2 = plt.axes([0.7, 0.01, 0.1, 0.075])
+    bnext = Button(axprev2, 'Nächstes')
+    bnext.on_clicked(next)
+
+    axprev3 = plt.axes([0.6, 0.01, 0.1, 0.075])
+    bfalse = Button(axprev3, 'Label False', color='red')
+
+    axprev4 = plt.axes([0.5, 0.01, 0.1, 0.075])
+    btrue = Button(axprev4, 'Label True', color='green')
+
+    axprev5 = plt.axes([0.4, 0.01, 0.1, 0.075])
+    bprev = Button(axprev5, 'Voriges')
+    bprev.on_clicked(previous)
+
+    axprev6 = plt.axes([0.2, 0.01, 0.1, 0.075])
+    bunsim = Button(axprev6, 'Unähnliche')
+    bunsim.on_clicked(unsimilar)
+
+    axprev7 = plt.axes([0.1, 0.01, 0.1, 0.075])
+    bsim = Button(axprev7, 'Ähnliche')
+    bsim.color = 'white'
+    bsim.on_clicked(similar)
+
+    plt.show()
+
+
