@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 from scipy.spatial.distance import euclidean
+import os
+import matplotlib.pyplot as plt
+from dtaidistance import dtw
+
 
 
 NAME = r"dataset\ECG.csv"
@@ -38,26 +42,51 @@ def generate_data():
 
 def build_window_dataset(data, window_length):
 
-    data_slidingwindow = np.ndarray((data.shape[0]-window_length, window_length))
+    data_slidingwindow = np.ndarray(
+        (data.shape[0]-window_length, window_length))
     for ix in range(data.shape[0]-window_length):
         data_slidingwindow[ix, :] = data[ix:ix+window_length]
         
     return data_slidingwindow
 
 
-def find_candidates(data, xmin, xmax, distance = 'euclidean', datatransform = 'data'):
+def find_candidates(data, xmin, xmax, distance='euclidean'):
+
+    if distance == 'dtw':
+        distance_func = dtw.distance_fast
+    else:
+        distance_func = euclidean
 
     length = xmax - xmin
 
-#    if datatransform == 'data+gradient':
-#        data = np.append(data, np.gradient(data))
-#    elif datatransform == 'gradient':
-#        data = np.gradient(data)
-
     dist_array = np.ndarray((data.shape[0]-length))
-    if distance == 'euclidean':
-        for ix in range(data.shape[0]-length):
-            dist_array[ix] = euclidean(data[xmin:xmax], data[ix:ix+length])
+    for ix in range(data.shape[0]-length):
+        dist_array[ix] = distance_func(data[xmin:xmax], data[ix:ix+length])
 
     return np.argsort(dist_array)
+
+
+def print_candidate_list(sorted_list, data, length, distance='euclidean'):
+
+    try:
+        os.mkdir('sortedlist')
+    except:
+        pass
+
+    if distance == 'dtw':
+        distance_func = dtw.distance_fast
+    else:
+        distance = 'euclidean'
+        distance_func = euclidean
+
+    for ix in range(len(sorted_list)):
+        plt.figure()
+        plt.plot(
+            list(range(sorted_list[ix], sorted_list[ix]+length)),
+            data[sorted_list[ix]:sorted_list[ix]+length])
+        plt.title(
+            str(distance_func(data[sorted_list[0]:sorted_list[0]+length], data[sorted_list[ix]:sorted_list[ix]+length])))
+        plt.savefig(
+            'sortedlist/'+distance+'_'+str(ix)+'_'+str(sorted_list[ix])+'.png')
+        plt.close()
 
